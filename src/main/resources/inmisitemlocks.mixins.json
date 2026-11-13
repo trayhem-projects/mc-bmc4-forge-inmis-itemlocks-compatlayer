@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "de.example.inmisitemlocks.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "inmisitemlocks.refmap.json",
+  "client": [
+    "AbstractContainerScreenAccessor",
+    "LockManagerMixin",
+    "AbstractContainerScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

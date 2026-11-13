@@ -1,0 +1,60 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
+}
+
+group = 'de.example.inmisitemlocks'
+version = '1.0.0'
+archivesBaseName = 'inmis-itemlocks-compat'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods {
+                inmisitemlocks { source sourceSets.main }
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    // Place the exact mod jars from your BMC4 instance in ./libs before building.
+    implementation fg.deobf(files('libs/ItemLocks-Forge-1.20.1-1.3.8.jar'))
+    implementation fg.deobf(files('libs/inmis-2.7.2-2.9.4-1.20.1.jar'))
+}
+
+mixin {
+    add sourceSets.main, 'inmisitemlocks.refmap.json'
+    config 'inmisitemlocks.mixins.json'
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+            'Specification-Title'     : 'Inmis ItemLocks Compatibility',
+            'Specification-Vendor'    : 'Local build',
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : project.version,
+            'MixinConfigs'            : 'inmisitemlocks.mixins.json'
+        ])
+    }
+}

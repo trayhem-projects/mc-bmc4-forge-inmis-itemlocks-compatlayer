@@ -1,0 +1,38 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[mods]]
+modId="inmisitemlocks"
+version="1.0.0"
+displayName="Inmis ItemLocks Compatibility"
+authors="Local compatibility addon"
+description='''Adds ItemLocks slot-lock support to Inmis backpack storage slots on the client.'''
+
+[[dependencies.inmisitemlocks]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.inmisitemlocks]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1]"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.inmisitemlocks]]
+modId="inmis"
+mandatory=true
+versionRange="[2.7.2,)"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.inmisitemlocks]]
+modId="ktnilcks"
+mandatory=true
+versionRange="[1.20.1-1.3.8,)"
+ordering="AFTER"
+side="CLIENT"

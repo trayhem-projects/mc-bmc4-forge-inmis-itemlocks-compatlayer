@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Specification-Title: Inmis ItemLocks Compatibility
+Specification-Vendor: Local build
+Specification-Version: 1
+Implementation-Title: inmis-itemlocks-compat
+Implementation-Version: 1.0.0
+MixinConfigs: inmisitemlocks.mixins.json
+
