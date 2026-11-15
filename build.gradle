@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'de.example.inmisitemlocks'
-version = '1.0.0'
+version = '1.1.0'
 archivesBaseName = 'inmis-itemlocks-compat'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)

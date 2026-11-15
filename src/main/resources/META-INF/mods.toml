@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="inmisitemlocks"
-version="1.0.0"
+version="1.1.0"
 displayName="Inmis ItemLocks Compatibility"
 authors="Local compatibility addon"
 description='''Adds ItemLocks slot-lock support to Inmis backpack storage slots on the client.'''
