@@ -39,6 +39,14 @@ dependencies {
     // Place the exact mod jars from your BMC4 instance in ./libs before building.
     implementation fg.deobf(files('libs/ItemLocks-Forge-1.20.1-1.3.8.jar'))
     implementation fg.deobf(files('libs/inmis-2.7.2-2.9.4-1.20.1.jar'))
+
+    compileOnly fg.deobf(files('libs/clientsort-forge-3.82.2+1.20.1.jar'))
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
 
 mixin {

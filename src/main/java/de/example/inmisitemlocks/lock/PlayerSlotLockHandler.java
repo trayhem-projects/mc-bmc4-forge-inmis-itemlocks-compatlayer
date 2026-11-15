@@ -4,6 +4,7 @@ package de.example.inmisitemlocks.lock;
 import com.kirdow.itemlocks.client.LockManager;
 import com.kirdow.itemlocks.util.enums.ContainerType;
 import com.kirdow.itemlocks.util.locks.InventoryHelper;
+import de.example.inmisitemlocks.logic.LockIds;
 import draylar.inmis.ui.BackpackHandledScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -19,7 +20,7 @@ public final class PlayerSlotLockHandler {
             Slot slot
     ) {
         if (screen instanceof BackpackHandledScreen) {
-            return slot.getSlotIndex() + 27;
+            return LockIds.player(slot.getSlotIndex());
         }
 
         ContainerType type = ContainerType.match(screen);

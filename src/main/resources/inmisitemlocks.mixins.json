@@ -7,7 +7,8 @@
   "client": [
     "AbstractContainerScreenAccessor",
     "LockManagerMixin",
-    "AbstractContainerScreenMixin"
+    "AbstractContainerScreenMixin",
+    "ClientSortItemLocksCompatMixin"
   ],
   "injectors": {
     "defaultRequire": 1

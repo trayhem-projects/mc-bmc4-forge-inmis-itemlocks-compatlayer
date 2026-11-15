@@ -8,6 +8,9 @@ import com.kirdow.itemlocks.config.state.ConfigStates;
 import com.kirdow.itemlocks.proxy.Components;
 import de.example.inmisitemlocks.BackpackLockIds;
 import de.example.inmisitemlocks.lock.BackpackLockHandler;
+import de.example.inmisitemlocks.logic.LockIds;
+import de.example.inmisitemlocks.logic.LockInteraction;
+import de.example.inmisitemlocks.logic.LockVisual;
 import de.example.inmisitemlocks.lock.PlayerSlotLockHandler;
 import de.example.inmisitemlocks.transfer.BackpackTransferHandler;
 import de.example.inmisitemlocks.transfer.PlayerTransferHandler;
@@ -33,7 +36,11 @@ public abstract class AbstractContainerScreenMixin {
     @Unique
     private boolean inmisitemlocks$blockedDrag = false;
 
-    @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "slotClicked",
+            at = @At("HEAD"),
+            cancellable = true
+    )
     private void inmisitemlocks$handleSlotClick(
             Slot slot,
             int slotId,
@@ -44,9 +51,13 @@ public abstract class AbstractContainerScreenMixin {
         Minecraft minecraft = Minecraft.getInstance();
 
         if (minecraft.player == null || slot == null) return;
-        if (KeyBindings.isBypass()) return;
+        boolean bypass =
+                KeyBindings.isBypass() || ConfigStates.Action.bypassAll();
 
-        LockManager manager = Components.getComponent(LockManager.class);
+        if (bypass) return;
+
+        LockManager manager =
+                Components.getComponent(LockManager.class);
 
         if (manager == null) return;
 
@@ -56,9 +67,19 @@ public abstract class AbstractContainerScreenMixin {
         boolean backpackScreen = screen instanceof BackpackHandledScreen;
         boolean playerSlot =
                 slot.container == minecraft.player.getInventory();
+        boolean middle = clickType == ClickType.CLONE;
 
         if (playerSlot
-                && PlayerSlotLockHandler.isLocked(screen, slot, manager)) {
+                && LockInteraction.blocksClick(
+                        PlayerSlotLockHandler.isLocked(screen, slot, manager),
+                        !slot.hasItem(), false, middle)) {
+            ci.cancel();
+            return;
+        }
+
+        if (backpackScreen
+                && inmisitemlocks$touchesLockedStack(
+                        minecraft, screen, slot, mouseButton, clickType, manager)) {
             ci.cancel();
             return;
         }
@@ -112,7 +133,10 @@ public abstract class AbstractContainerScreenMixin {
         if (playerSlot) {
             if (clickType == ClickType.QUICK_MOVE) {
                 BackpackTransferHandler.transferIntoUnlockedSlots(
-                        minecraft, handler, slot, manager
+                        minecraft,
+                        handler,
+                        slot,
+                        manager
                 );
 
                 ci.cancel();
@@ -121,19 +145,72 @@ public abstract class AbstractContainerScreenMixin {
             return;
         }
 
-        if (BackpackLockHandler.isLocked(slot, manager)) {
+        if (LockInteraction.blocksClick(
+                BackpackLockHandler.isLocked(slot, manager),
+                !slot.hasItem(), false, middle)) {
             ci.cancel();
             return;
         }
 
-        // Rücktransfer aus dem Backpack ins Spielerinventar.
         if (clickType == ClickType.QUICK_MOVE) {
             PlayerTransferHandler.transferIntoUnlockedSlots(
-                    minecraft, screen, handler, slot, manager
+                    minecraft,
+                    screen,
+                    handler,
+                    slot,
+                    manager
             );
 
             ci.cancel();
         }
+    }
+
+    /**
+     * Number-key swaps with a locked hotbar slot and double-click "collect all"
+     * would pull items out of locked slots without clicking on them.
+     */
+    @Unique
+    private static boolean inmisitemlocks$touchesLockedStack(
+            Minecraft minecraft,
+            AbstractContainerScreen<?> screen,
+            Slot clicked,
+            int mouseButton,
+            ClickType clickType,
+            LockManager manager
+    ) {
+        if (clickType == ClickType.SWAP) {
+            int hotbar = mouseButton;
+
+            if (hotbar >= 0 && hotbar <= 8) {
+                return LockInteraction.blocksClick(
+                        manager.isLockedSlotRaw(LockIds.player(hotbar)),
+                        minecraft.player.getInventory().getItem(hotbar).isEmpty(),
+                        false, false);
+            }
+
+            return false;
+        }
+
+        if (clickType == ClickType.PICKUP_ALL) {
+            ItemStack carried = screen.getMenu().getCarried();
+
+            if (carried.isEmpty()) return false;
+
+            for (Slot other : screen.getMenu().slots) {
+                if (!other.hasItem()
+                        || !ItemStack.isSameItemSameTags(carried, other.getItem())) {
+                    continue;
+                }
+
+                boolean locked = other.container == minecraft.player.getInventory()
+                        ? PlayerSlotLockHandler.isLocked(screen, other, manager)
+                        : BackpackLockHandler.isLocked(other, manager);
+
+                if (locked) return true;
+            }
+        }
+
+        return false;
     }
 
     @Inject(
@@ -151,14 +228,17 @@ public abstract class AbstractContainerScreenMixin {
     ) {
         Minecraft minecraft = Minecraft.getInstance();
 
-        if (minecraft.player == null || KeyBindings.isBypass()) return;
+        if (minecraft.player == null
+                || KeyBindings.isBypass()
+                || ConfigStates.Action.bypassAll()) return;
 
         if (inmisitemlocks$blockedDrag) {
             cir.setReturnValue(true);
             return;
         }
 
-        LockManager manager = Components.getComponent(LockManager.class);
+        LockManager manager =
+                Components.getComponent(LockManager.class);
 
         if (manager == null) return;
 
@@ -181,6 +261,9 @@ public abstract class AbstractContainerScreenMixin {
         } else {
             locked = false;
         }
+
+        locked = LockInteraction.blocksClick(
+                locked, !hovered.hasItem(), false, false);
 
         if (locked) {
             inmisitemlocks$blockedDrag = true;
@@ -210,5 +293,84 @@ public abstract class AbstractContainerScreenMixin {
         inmisitemlocks$blockedDrag = false;
 
         cir.setReturnValue(true);
+    }
+
+    @Inject(method = "render", at = @At("TAIL"))
+    private void inmisitemlocks$drawLockMarks(
+            GuiGraphics graphics,
+            int mouseX,
+            int mouseY,
+            float partialTick,
+            CallbackInfo ci
+    ) {
+        if (!((Object) this instanceof BackpackHandledScreen screen)) {
+            return;
+        }
+
+        Minecraft minecraft = Minecraft.getInstance();
+
+        if (minecraft.player == null) return;
+
+        BackpackScreenHandler handler = screen.getMenu();
+
+        if (handler == null) return;
+
+        LockManager manager;
+
+        try {
+            manager = Components.getComponent(LockManager.class);
+        } catch (Throwable ignored) {
+            return;
+        }
+
+        if (manager == null) return;
+
+        AbstractContainerScreenAccessor accessor =
+                (AbstractContainerScreenAccessor) screen;
+
+        int guiLeft = accessor.inmisitemlocks$getLeftPos();
+        int guiTop = accessor.inmisitemlocks$getTopPos();
+
+        Slot hovered = accessor.inmisitemlocks$getSlotUnderMouse();
+
+        boolean toggleActive =
+                KeyBindings.isToggle() && !Screen.hasShiftDown();
+
+        boolean bypassVisual =
+                KeyBindings.isBypass()
+                        || ConfigStates.Action.bypassAll()
+                        || (!handler.getCarried().isEmpty()
+                        && ConfigStates.Action.bypassHeld());
+
+        for (Slot slot : handler.slots) {
+            if (slot.container == minecraft.player.getInventory()) {
+                continue;
+            }
+
+            LockVisual.Icon icon = LockVisual.icon(
+                    manager.isLockedSlotRaw(BackpackLockIds.forSlot(slot)),
+                    slot.hasItem(),
+                    hovered == slot,
+                    bypassVisual,
+                    toggleActive
+            );
+
+            ELockModifier modifier = switch (icon) {
+                case NONE -> null;
+                case LOCKED -> ELockModifier.Locked;
+                case UNLOCKED -> ELockModifier.Unlocked;
+                case LIFTED_LOCKED -> ELockModifier.LiftedLocked;
+                case LIFTED_UNLOCKED -> ELockModifier.LiftedUnlocked;
+            };
+
+            if (modifier == null) continue;
+
+            RenderContainer.drawLock(
+                    graphics,
+                    guiLeft + slot.x,
+                    guiTop + slot.y,
+                    modifier
+            );
+        }
     }
 }

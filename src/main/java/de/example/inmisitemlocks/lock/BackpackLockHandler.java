@@ -3,6 +3,7 @@ package de.example.inmisitemlocks.lock;
 
 import com.kirdow.itemlocks.client.LockManager;
 import de.example.inmisitemlocks.BackpackLockIds;
+import de.example.inmisitemlocks.logic.LockIds;
 import draylar.inmis.ui.BackpackScreenHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
@@ -72,7 +73,7 @@ public final class BackpackLockHandler {
                 if (moved <= 0) continue;
 
                 if (manager.isLockedSlotRaw(
-                        target.getSlotIndex() + 27)) {
+                        LockIds.player(target.getSlotIndex()))) {
                     return true;
                 }
 
@@ -101,7 +102,7 @@ public final class BackpackLockHandler {
             if (moved <= 0) continue;
 
             if (manager.isLockedSlotRaw(
-                    target.getSlotIndex() + 27)) {
+                    LockIds.player(target.getSlotIndex()))) {
                 return true;
             }
 
