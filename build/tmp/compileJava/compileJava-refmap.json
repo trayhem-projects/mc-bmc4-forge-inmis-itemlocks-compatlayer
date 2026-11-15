@@ -3,8 +3,7 @@
     "de/example/inmisitemlocks/mixin/AbstractContainerScreenMixin": {
       "mouseReleased": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_6348_(DDI)Z",
       "mouseDragged": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_7979_(DDIDD)Z",
-      "slotClicked": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_6597_(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V",
-      "render": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_88315_(Lnet/minecraft/client/gui/GuiGraphics;IIF)V"
+      "slotClicked": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_6597_(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V"
     },
     "de/example/inmisitemlocks/mixin/AbstractContainerScreenAccessor": {
       "leftPos": "f_97735_:I",
@@ -19,8 +18,7 @@
       "de/example/inmisitemlocks/mixin/AbstractContainerScreenMixin": {
         "mouseReleased": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_6348_(DDI)Z",
         "mouseDragged": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_7979_(DDIDD)Z",
-        "slotClicked": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_6597_(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V",
-        "render": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_88315_(Lnet/minecraft/client/gui/GuiGraphics;IIF)V"
+        "slotClicked": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_6597_(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V"
       },
       "de/example/inmisitemlocks/mixin/AbstractContainerScreenAccessor": {
         "leftPos": "f_97735_:I",
